@@ -1,0 +1,43 @@
+name: Panda latest
+
+# Runs the parity suite against the newest @pandacss/* release, so a Panda change
+# that breaks Qwik output is caught before anyone upgrades.
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install latest Panda
+        id: panda
+        run: |
+          pnpm add -D @pandacss/dev@latest @pandacss/types@latest @pandacss/preset-base@latest @pandacss/preset-panda@latest @pandacss/vite@latest
+          echo "version=$(node -p "require('@pandacss/dev/package.json').version")" >> "$GITHUB_OUTPUT"
+      - run: pnpm test
+      - run: pnpm test:types
+      - name: Open an issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PANDA_VERSION: ${{ steps.panda.outputs.version }}
+        run: |
+          title="Parity failure on @pandacss/dev ${PANDA_VERSION:-latest}"
+          if gh issue list --state open --search "in:title \"$title\"" --json number --jq 'length' | grep -qv '^0$'; then
+            echo "Issue already open."
+            exit 0
+          fi
+          gh issue create --title "$title" --body "The scheduled parity run failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

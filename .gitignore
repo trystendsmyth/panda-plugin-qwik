@@ -1,0 +1,8 @@
+node_modules
+dist
+coverage
+test/.generated
+*.tsbuildinfo
+.eslintcache
+.prettiercache
+.DS_Store
