@@ -1,6 +1,6 @@
 {
   "name": "panda-plugin-qwik",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Panda CSS v2 plugin that generates Qwik JSX pattern components (Box, Stack, VStack, HStack, …) with full style-prop support.",
   "keywords": [
     "pandacss",
