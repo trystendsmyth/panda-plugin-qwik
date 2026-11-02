@@ -58,14 +58,19 @@ export function detectFormat(artifacts: CodegenPrepareArtifact[]): OutputFormat 
  * every `SystemProperties` key and every `Conditions` key from the generated
  * `types/system` module. Reading Panda's own output keeps the list exact without
  * re-deriving utilities, shorthands or breakpoint/container conditions.
+ *
+ * Panda ≥2.3 declares the keys on `Local<Name>` and makes `<Name>` extend
+ * `Registered<…>`; 2.2 declares them on `<Name>` directly.
  */
 export function collectCssPropertyNames(artifacts: CodegenPrepareArtifact[]): string[] {
   const system = findFile(artifacts, (path) => /^types\/system\.(d\.m?ts|ts)$/.test(path))
   if (!system) throw new Error(`${PREFIX} Panda generated no types/system module; cannot derive style props.`)
 
   const keysOf = (name: string) => {
-    const start = system.code.indexOf(`export interface ${name} {`)
-    if (start === -1) throw new Error(`${PREFIX} types/system has no \`${name}\` interface.`)
+    const start = [`interface Local${name} {`, `export interface ${name} {`]
+      .map((declaration) => system.code.indexOf(declaration))
+      .find((index) => index !== -1)
+    if (start === undefined) throw new Error(`${PREFIX} types/system has no \`${name}\` interface.`)
     const end = system.code.indexOf('\n}', start)
     return [...system.code.slice(start, end).matchAll(/^\s+"?([^"?:\s]+)"?\??:/gm)].flatMap((match) =>
       match[1] ? [match[1]] : [],
