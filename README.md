@@ -5,7 +5,7 @@ Qwik pattern components for [Panda CSS](https://panda-css.com) v2.
 ```tsx
 import { VStack, HStack, Box } from 'styled-system/jsx'
 
-export const Card = component$(() => (
+export const Card = () => (
   <VStack gap="4" p="6" bg="bg.subtle" _hover={{ shadow: 'md' }}>
     <HStack justify="space-between">
       <Box as="h3" fontWeight="semibold">
@@ -13,7 +13,7 @@ export const Card = component$(() => (
       </Box>
     </HStack>
   </VStack>
-))
+)
 ```
 
 Panda v2 removed Qwik JSX generation: `jsxFramework: 'qwik'` no longer produces `Box`, `Stack`, `VStack` or any
